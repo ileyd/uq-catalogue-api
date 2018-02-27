@@ -46,7 +46,7 @@ class Semester:
       raise ValueError("Response from rota API was not valid JSON")
     
     self.name = data["name"]
-    if data.number != "?":
+    if data["number"] != "?":
       self.number = int(data["number"])
     self.start_week = data["start_week"]
     self.midsemester_week = data["midsem_week"]
