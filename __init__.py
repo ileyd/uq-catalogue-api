@@ -1,8 +1,8 @@
 """
 Scraper for all
 """
-from .course import course
-from .catalogue import catalogue
-from .plan import plan
-from .program import program
-from .program import get_program_course_list as program_course_list
+
+from .catalogue import Catalogue
+from .course import Course, CourseSemestersOffered
+from .plan import Plan
+from .program import Program
