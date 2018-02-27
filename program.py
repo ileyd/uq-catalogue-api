@@ -52,7 +52,7 @@ class Program:
     plans = soup.find_all('a', href=re.compile("acad_plan"))
     for plan in plans:
       plan_code = plan['href'][-10:]
-      title = plan.text
+      # title = plan.text
       self.plans.append(plan_code)
     
     alt_base_url = 'https://www.uq.edu.au/study/program_list.html?acad_prog={}'.format(self.code)
