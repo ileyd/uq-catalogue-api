@@ -45,19 +45,19 @@ class Semester:
     except:
       raise ValueError("Response from rota API was not valid JSON")
     
-    self.name = data.name
+    self.name = data["name"]
     if data.number != "?":
-      self.number = int(data.number)
-    self.start_week = data.start_week
-    self.midsemester_week = data.midsem_week
-    self.finish_week = data.finish_week
-    self.current = data
+      self.number = int(data["number"])
+    self.start_week = data["start_week"]
+    self.midsemester_week = data["midsem_week"]
+    self.finish_week = data["finish_week"]
+    self.current = data["current"]
     try:
-      self.preceeding = data.pred.id
+      self.preceeding = data["pred"]["id"]
     except:
       pass
     try:
-      self.succeeding = data.succ.id
+      self.succeeding = data["succ"]["id"]
     except:
       pass
     
