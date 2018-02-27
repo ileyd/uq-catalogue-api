@@ -1,10 +1,10 @@
 # UQ Catalogue API (unofficial)
 
-:mortar_board: (Unofficial) webscraper and API for University of Queensland Course and Program Data
+:mortar_board: (Unofficial) webscraper/API for University of Queensland Course and Program data
 
 ## Overview
 
-This project includes the tools to build the [PostgreSQL database](https://github.com/tomquirk/uq-catalogue-api/tree/master/db) (web scraper and sql schema) as well as the [REST API](https://github.com/tomquirk/uq-catalogue-api/tree/master/api) (currently in Node.js). Consult each tools respective README's for detailed information.
+This project is a fork of [uq-catalogue-api](https://github.com/tomquirk/uq-catalogue-api) that just focuses an creating a UQ course and program info scraper/API package.
 
 ## Contributing
 
