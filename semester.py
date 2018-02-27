@@ -78,3 +78,10 @@ def get_all_semesters():
 
   return semesters
   
+def get_semester_by_name(name: str):
+  if name == '':
+    raise ValueError('Empty semester name provided')
+  else:
+    sems = get_all_semesters()
+    sems = [sem for sem in sems if sem.name == name]
+    return sems[0]

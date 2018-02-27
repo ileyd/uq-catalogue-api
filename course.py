@@ -2,6 +2,8 @@
 Code to scrape University of Queensland course (subject) information
 """
 from .helpers import get_soup
+from .offering import Offering
+from .semester import Semester, get_all_semesters, get_semester_by_name
 from typing import List
 
 class CourseSemestersOffered:
@@ -68,6 +70,8 @@ class Course:
   incompatibilities: List[str] = []
   # which programs this course is restricted to
   restricted: List[str] = []
+  # offerings of this course
+  offerings: List[Offering] = []
 
   # whether the course is valid
   def valid(self):
@@ -147,3 +151,39 @@ class Course:
     if "Summer Semester, " in semester_offerings:
       sem_sum = True
     self.semesters_offered = CourseSemestersOffered(sem_one, sem_two, sem_sum)
+
+    current_offerings_table = soup.find(id='course-current-offerings')
+    current_offerings = []
+    current_offerings_rows = current_offerings_table.find_all('tr')
+    for row in current_offerings_rows[1:]:
+      cols = row.find_all('td')
+      semester_name = cols[0].text.strip()
+      if 'unavailable' in cols[3].get_text():
+        continue
+      profile_id = int(cols[3].find('a')['href'].split('profileId=')[1])
+      current_offerings.append({
+        "semester_name": semester_name,
+        "profile_id": profile_id,
+        "course_code": self.code
+      })
+
+    archived_offerings_table = soup.find(id='course-archived-offerings')
+    archived_offerings = []
+    archived_offerings_rows = archived_offerings_table.find_all('tr')
+    for row in archived_offerings_rows[1:]:
+      cols = row.find_all('td')
+      semester_name = cols[0].text.strip()
+      if 'unavailable' in cols[3].get_text():
+        continue
+      profile_id = int(cols[3].find('a')['href'].split('profileId=')[1])
+      current_offerings.append({
+        "semester_name": semester_name,
+        "profile_id": profile_id,
+        "course_code": self.code
+      })
+
+    for offering in archived_offerings + current_offerings:
+      semester_id = get_semester_by_name(offering["semester_name"]).id
+      off = Offering(offering["course_code"], semester_id, offering["profile_id"])
+      self.offerings.append(off)
+    
