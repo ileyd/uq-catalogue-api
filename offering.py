@@ -4,16 +4,20 @@ Code relating to offerings: specific instances of courses in a particular semest
 from .semester import Semester
 from .course import Course, CourseSemestersOffered
 from .assessment import Assessment
+from .helpers import get_soup
 from lxml import html, etree
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 from typing import List
 import requests
+
 
 def valid_percentage(percentage: float):
   return 0 <= percentage <= 1
 
+
 def vp(percentage: float):
   return valid_percentage(percentage)
+
 
 class OfferingCutoffs:
   """Describes the cut offs for each mark for a particular Offering"""
@@ -28,12 +32,14 @@ class OfferingCutoffs:
   def valid(self):
     """Whether the OfferingCutoffs object represents valid cutoffs"""
     sane = self.one < self.two < self.three < self.four < self.five < self.six < self.seven
-    valid = vp(self.one) and vp(self.two) and vp(self.three) and vp(self.four) and vp(self.five) and vp(self.six) and vp(self.seven)
+    valid = vp(self.one) and vp(self.two) and vp(self.three) and vp(
+        self.four) and vp(self.five) and vp(self.six) and vp(self.seven)
     return sane and valid
 
   def __init__(self, one: float = 0.00, two: float = 0.30, three: float = 0.45, four: float = 0.50, five: float = 0.65, six: float = 0.75, seven: float = 0.85):
     if not (vp(one) and vp(two) and vp(three) and vp(four) and vp(five) and vp(six) and vp(seven) and one < two < three < four < five < six < seven):
-      raise ValueError('An invalid cutoff has been provided that is outside the range of 0 to 1.')
+      raise ValueError(
+          'An invalid cutoff has been provided that is outside the range of 0 to 1.')
     else:
       self.one = one
       self.two = two
@@ -42,6 +48,7 @@ class OfferingCutoffs:
       self.five = five
       self.six = six
       self.seven = seven
+
 
 class Offering:
   # code of the course the offering relates to
@@ -86,34 +93,33 @@ class Offering:
     """Updates self based on information scraped from UQ"""
     profile_url = 'http://www.courses.uq.edu.au/student_section_loader.php?profileId={}&section={}'
     profile_url_5 = profile_url.format(self.profile_id, 5)
-    profile_res_5 = requests.get(profile_url_5)
-    profile_tree_5 = html.fromstring(profile_res_5.text)
-    html_parser = HTMLParser()
+    soup_5 = get_soup(profile_url_5)
 
-    assessment_tasks_elements = profile_tree_5.xpath('//table[@class="tblborder centercolumn"]/tr[position() > 1]/td[1]')
-    assessment_tasks = [
-      html_parser.unescape(
-        etree.tostring(element).split("<br />", 1)[1].split("</div>", 1)[0].split("</td>", 1)[0].replace('&amp;', '&')
-      )
-      for element in assessment_tasks_elements
-    ]
-
+    assessment_table = soup_5.find('table', attrs={'class':'tblborder'})
+    assessment_tasks = []
+    assessment_table_rows = assessment_table.find_all('tr')
+    for row in assessment_table_rows:
+      cols = row.find_all('td')
+      cols = [ele.text.strip() for ele in cols]
+      assessment_tasks.append([ele for ele in cols if ele])
+      
+    # TODO assessment task names
     # TODO assessment due text
-
-    assessment_weightings_elements = profile_tree_5.xpath('//table[@class="tblborder centercolumn"]/tr[position() > 1]/td[3]')
-    assessment_weightings = [
-      etree.tostring(element).split(">", 1)[1].split("%", 1)[0].split("</", 1)[0]
-      for element in assessment_weightings_elements
-    ]
-
+    # TODO assessment task weightings
     # TODO assessment hurdle
 
-    if len(assessment_tasks) < 1 or len(assessment_tasks) != len(assessment_weightings):
+    if len(assessment_tasks) < 1:
       # TODO implement more specific error
+      print("ATASKS:")
+      print(assessment_tasks)
       raise ValueError('Invalid course profile')
 
     self.assessment = []
-    for atask in zip(assessment_tasks, assessment_weightings):
-      weight = float(atask[1]) / 100
-      ass = Assessment(course_code=self.course_code, semester_id=self.semester_id, profile_id=self.profile_id, name=atask[0], weight=weight)
+    for atask in assessment_tasks[1:]:
+      hurdle = False
+      if 'hurdle' in atask[2].lower():
+        hurdle = True
+      weight = float(atask[2].split('%')[0]) / 100
+      ass = Assessment(course_code=self.course_code, semester_id=self.semester_id,
+                       profile_id=self.profile_id, name=atask[0], weight=weight, hurdle=hurdle, due_text=atask[1])
       self.assessment.append(ass)
