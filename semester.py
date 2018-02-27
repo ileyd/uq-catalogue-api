@@ -72,7 +72,7 @@ def get_all_semesters():
   semesters: List[Semester] = []
 
   for semester in data:
-    sid = semester.id
+    sid = semester["id"]
     sem = Semester(sid)
     semesters.append(sem)
 
@@ -82,6 +82,17 @@ def get_semester_by_name(name: str):
   if name == '':
     raise ValueError('Empty semester name provided')
   else:
-    sems = get_all_semesters()
-    sems = [sem for sem in sems if sem.name == name]
-    return sems[0]
+    url = 'http://rota.eait.uq.edu.au/semesters.json'
+    res = requests.get(url)
+    try:
+      data = res.json()
+    except:
+      raise ValueError("Response from rota API was not valid JSON")
+
+    semesters: List[Semester] = [semester for semester in data if semester["name"] == name.strip()]
+    try:
+      semester_id = semesters[0]["id"]
+      return Semester(semester_id)
+    except:
+      print("Searching for" + name + "failed")
+      return None

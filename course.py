@@ -173,6 +173,8 @@ class Course:
     for row in archived_offerings_rows[1:]:
       cols = row.find_all('td')
       semester_name = cols[0].text.strip()
+      if int(semester_name[-4:]) < 2012:
+        continue
       if 'unavailable' in cols[3].get_text():
         continue
       profile_id = int(cols[3].find('a')['href'].split('profileId=')[1])

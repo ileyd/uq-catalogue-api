@@ -2,7 +2,7 @@
 Code relating to offerings: specific instances of courses in a particular semester
 """
 from .semester import Semester
-from .course import Course, CourseSemestersOffered
+#from .course import Course, CourseSemestersOffered
 from .assessment import Assessment
 from .helpers import get_soup
 from lxml import html, etree
@@ -72,9 +72,9 @@ class Offering:
     """Returns a Semester object for the semester this Offering corresponds to"""
     return Semester(self.semester_id)
 
-  def course(self):
-    """Returns a Course object for the course this Offering corresponds to"""
-    return Course(self.course_code)
+  #def course(self):
+  #  """Returns a Course object for the course this Offering corresponds to"""
+  #  return Course(self.course_code)
 
   def __init__(self, course_code: str, semester_id: int, profile_id: int):
     if course_code == '':
