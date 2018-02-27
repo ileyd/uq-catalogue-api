@@ -102,11 +102,6 @@ class Offering:
       cols = row.find_all('td')
       cols = [ele.text.strip() for ele in cols]
       assessment_tasks.append([ele for ele in cols if ele])
-      
-    # TODO assessment task names
-    # TODO assessment due text
-    # TODO assessment task weightings
-    # TODO assessment hurdle
 
     if len(assessment_tasks) < 1:
       # TODO implement more specific error
