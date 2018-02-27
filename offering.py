@@ -3,6 +3,10 @@ Code relating to offerings: specific instances of courses in a particular semest
 """
 from .semester import Semester
 from .course import Course, CourseSemestersOffered
+from .assessment import Assessment
+from lxml import html, etree
+from HTMLParser import HTMLParser
+from typing import List
 import requests
 
 def valid_percentage(percentage: float):
@@ -54,6 +58,8 @@ class Offering:
   cutoffs: OfferingCutoffs = OfferingCutoffs()
   # id for the course profile
   profile_id: int = -1
+  # assessment for this offering
+  assessment: List[Assessment] = []
 
   def semester(self):
     """Returns a Semester object for the semester this Offering corresponds to"""
@@ -63,3 +69,51 @@ class Offering:
     """Returns a Course object for the course this Offering corresponds to"""
     return Course(self.course_code)
 
+  def __init__(self, course_code: str, semester_id: int, profile_id: int):
+    if course_code == '':
+      raise ValueError('Empty course code provided')
+    elif semester_id < 6000:
+      raise ValueError('Invalid semester ID provided')
+    elif profile_id < 1:
+      raise ValueError('Invalid profile ID provided')
+    else:
+      self.course_code = course_code
+      self.semester_id = semester_id
+      self.profile_id = profile_id
+      self.update()
+
+  def update(self):
+    """Updates self based on information scraped from UQ"""
+    profile_url = 'http://www.courses.uq.edu.au/student_section_loader.php?profileId={}&section={}'
+    profile_url_5 = profile_url.format(self.profile_id, 5)
+    profile_res_5 = requests.get(profile_url_5)
+    profile_tree_5 = html.fromstring(profile_res_5.text)
+    html_parser = HTMLParser()
+
+    assessment_tasks_elements = profile_tree_5.xpath('//table[@class="tblborder centercolumn"]/tr[position() > 1]/td[1]')
+    assessment_tasks = [
+      html_parser.unescape(
+        etree.tostring(element).split("<br />", 1)[1].split("</div>", 1)[0].split("</td>", 1)[0].replace('&amp;', '&')
+      )
+      for element in assessment_tasks_elements
+    ]
+
+    # TODO assessment due text
+
+    assessment_weightings_elements = profile_tree_5.xpath('//table[@class="tblborder centercolumn"]/tr[position() > 1]/td[3]')
+    assessment_weightings = [
+      etree.tostring(element).split(">", 1)[1].split("%", 1)[0].split("</", 1)[0]
+      for element in assessment_weightings_elements
+    ]
+
+    # TODO assessment hurdle
+
+    if len(assessment_tasks) < 1 or len(assessment_tasks) != len(assessment_weightings):
+      # TODO implement more specific error
+      raise ValueError('Invalid course profile')
+
+    self.assessment = []
+    for atask in zip(assessment_tasks, assessment_weightings):
+      weight = float(atask[1]) / 100
+      ass = Assessment(course_code=self.course_code, semester_id=self.semester_id, profile_id=self.profile_id, name=atask[0], weight=weight)
+      self.assessment.append(ass)
