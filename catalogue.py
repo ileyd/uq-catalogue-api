@@ -1,5 +1,5 @@
 """
-Catalogue scraper
+Code to scrape tho University of Queensland's program (degree) catalogue
 """
 import re
 from .helpers import get_soup
@@ -7,6 +7,8 @@ from typing import List
 
 
 class Catalogue:
+  """Describes the University of Queensland's catalogue of programs (degrees)
+  """
   # list of all program IDs
   programs: List[int] = []
 

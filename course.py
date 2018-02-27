@@ -1,5 +1,5 @@
 """
-Course scraper
+Code to scrape University of Queensland course (subject) information
 """
 from .helpers import get_soup
 from typing import List

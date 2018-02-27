@@ -1,5 +1,5 @@
 """
-Plan scraper
+Code to scrape University of Queensland program (degree) plan information
 """
 import re
 from .helpers import get_soup
@@ -7,6 +7,8 @@ from typing import List
 
 
 class Plan:
+  """A plan for certain courses to be completed in a program (degree)
+  """
   # plan code -- i think it might be an int
   code: str = ""
   # plan title

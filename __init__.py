@@ -1,5 +1,5 @@
 """
-Scraper for all
+Scraper for University of Queensland course and program data
 """
 
 from .catalogue import Catalogue

@@ -1,5 +1,5 @@
 """
-Program scraper
+Code to scrape University of Queensland program (degree) information
 """
 import re
 from .helpers import get_soup
