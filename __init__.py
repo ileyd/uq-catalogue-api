@@ -7,3 +7,5 @@ from .course import Course, CourseSemestersOffered
 from .plan import Plan
 from .program import Program
 from .semester import Semester, get_all_semesters
+from .assessment import Assessment
+from .offering import Offering
