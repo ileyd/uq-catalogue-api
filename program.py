@@ -3,67 +3,61 @@ Program scraper
 """
 import re
 import helpers as helpers
+from typing import List
+
 
 class Program:
-    code: str = ""
-    title: str = ""
-    level: str = ""
-    abbreviation: str = ""
-    duration: float = -1
-    units: int = -1
-    plans: list = []
+  """A degree that the university offers
+  """
 
+  # program code -- i think its an int
+  code: int = 0
+  # program title
+  title: str = ""
+  # program level -- e.g. Bachelor, Bachelor Honours, etc
+  level: str = ""
+  # official abbreviation -- e.g. BBiomedSc
+  abbreviation: str = ""
+  # duration in years
+  duration: float = 0
+  # total unit value
+  units: int = 0
+  # list of plan IDs
+  plans: list = []
+  # courses for this program
+  courses: List[str] = []
+  # whether program object is valid
+  valid_internal: bool = False
 
-def program(program_code):
+  def valid(self):
+    self.valid_internal = not (self.code == "" or self.title == "" or self.duration <= 0 or self.units < 1)
+    return self.valid_internal
+
+  def __init__(self, code: str):
+    self.code = code
+    self.update()
+
+  def update(self):
+    """Update self based on information scraped from UQ
     """
+    base_url = 'https://www.uq.edu.au/study/program.html?acad_prog={}'.format(str(self.code))
+    soup = helpers.get_soup(base_url)
 
-    :param program_code: str, program code for given program (4 digits)
-    :return: Dict, program details
-    """
+    self.title = soup.find(id="program-title").get_text()
+    self.level = soup.find(id="program-title").get_text().split(' ')[0].lower()
+    self.abbreviation = soup.find(id="program-abbreviation").get_text()
+    self.duration = float(soup.find(id="program-domestic-duration").get_text()[0])
+    self.units = int(soup.find(id="program-domestic-units").get_text())
+    
+    plans = soup.find_all('a', href=re.compile("acad_plan"))
+    for plan in plans:
+      plan_code = plan['href'][-10:]
+      title = plan.text
+      self.plans.append(plan_code)
+    
+    alt_base_url = 'https://www.uq.edu.au/study/program_list.html?acad_prog={}'.format(self.code)
+    alt_soup = helpers.get_soup(alt_base_url)
 
-    url = "https://www.uq.edu.au/study/program.html?acad_prog=" \
-        + str(program_code)
-    soup = helpers.get_soup(url)
-
-    program_data = {
-        'program_code': program_code,
-        'title': soup.find(id="program-title").get_text(),
-        'level': soup.find(id="program-title").get_text().split(' ')[0].lower(),
-        'abbreviation': soup.find(id="program-abbreviation").get_text(),
-        'durationYears': int(soup.find(id="program-domestic-duration").get_text()[0]),
-        'units': int(soup.find(id="program-domestic-units").get_text()),
-        'plan_list': [],
-        'course_list': get_program_course_list(program_code)
-    }
-
-    raw_plans = soup.find_all('a', href=re.compile("acad_plan"))
-
-    for raw_plan in raw_plans:
-        # remove extended majors (temporary, consider merging)
-        if raw_plan.text != 'Extended Major':
-            plan_code = raw_plan['href'][-10:]
-            title = raw_plan.text
-            program_data['plan_list'].append({
-                'plan_code': plan_code,
-                'title': title
-            })
-
-    return program_data
-
-
-def get_program_course_list(program_code):
-    """
-    Scrapes list of programs identified by title and program code
-    :return: List object, containing dictionaries of program details
-    """
-    course_list = []
-    # selection filter (program_code)
-
-    url = 'https://www.uq.edu.au/study/program_list.html?acad_prog=%s' % program_code
-    soup = helpers.get_soup(url)
-
-    raw_courses = soup.find_all("a", href=re.compile("course_code"))
-    for raw_course in raw_courses:
-        course_list.append(raw_course.get_text().strip())
-
-    return course_list
+    courses = alt_soup.find_all("a", href=re.compile("course_code"))
+    for course in courses:
+      self.courses.append(course.get_text().strip())
