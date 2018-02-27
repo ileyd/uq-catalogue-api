@@ -33,13 +33,13 @@ class Plan:
   def update(self, title: str = "NOT IMPLEMENTED"):
     """Updates self based on information scraped from UQ
     """
-    base_url = 'https://www.uq.edu.au/study/plan.html?acad_plan={}'.format(self.code)
+    base_url = 'https://my.uq.edu.au/programs-courses/plan.html?acad_plan={}'.format(self.code)
     soup = get_soup(base_url)
 
     self.title = title
     self.program = soup.find(id="plan-field-key").get_text()
     
-    alt_base_url = 'https://www.uq.edu.au/study/plan_display.html?acad_plan={}'.format(self.code)
+    alt_base_url = 'https://my.uq.edu.au/programs-courses/plan_display.html?acad_plan={}'.format(self.code)
     alt_soup = get_soup(alt_base_url)
 
     courses = alt_soup.find_all("a", href=re.compile("course_code"))

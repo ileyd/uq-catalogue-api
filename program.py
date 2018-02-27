@@ -40,7 +40,7 @@ class Program:
   def update(self):
     """Update self based on information scraped from UQ
     """
-    base_url = 'https://www.uq.edu.au/study/program.html?acad_prog={}'.format(str(self.code))
+    base_url = 'https://my.uq.edu.au/programs-courses/program.html?acad_prog={}'.format(str(self.code))
     soup = get_soup(base_url)
 
     self.title = soup.find(id="program-title").get_text()
@@ -55,7 +55,7 @@ class Program:
       # title = plan.text
       self.plans.append(plan_code)
     
-    alt_base_url = 'https://www.uq.edu.au/study/program_list.html?acad_prog={}'.format(self.code)
+    alt_base_url = 'https://my.uq.edu.au/programs-courses/program_list.html?acad_prog={}'.format(self.code)
     alt_soup = get_soup(alt_base_url)
 
     courses = alt_soup.find_all("a", href=re.compile("course_code"))
