@@ -2,7 +2,7 @@
 Catalogue scraper
 """
 import re
-import helpers as helpers
+from .helpers import get_soup
 from typing import List
 
 
@@ -18,7 +18,7 @@ class Catalogue:
     """Updates self based on information scraped from UQ
     """
     base_url: str = 'https://www.uq.edu.au/study/browse.html?level=ugpg'
-    soup = helpers.get_soup(base_url)
+    soup = get_soup(base_url)
 
     programs = soup.find_all("a", href=re.compile("acad_prog"))
     for program in programs:

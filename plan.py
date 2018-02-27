@@ -2,7 +2,7 @@
 Plan scraper
 """
 import re
-import helpers as helpers
+from .helpers import get_soup
 from typing import List
 
 
@@ -34,13 +34,13 @@ class Plan:
     """Updates self based on information scraped from UQ
     """
     base_url = 'https://www.uq.edu.au/study/plan.html?acad_plan={}'.format(self.code)
-    soup = helpers.get_soup(base_url)
+    soup = get_soup(base_url)
 
     self.title = title
     self.program = soup.find(id="plan-field-key").get_text()
     
     alt_base_url = 'https://www.uq.edu.au/study/plan_display.html?acad_plan={}'.format(self.code)
-    alt_soup = helpers.get_soup(alt_base_url)
+    alt_soup = get_soup(alt_base_url)
 
     courses = alt_soup.find_all("a", href=re.compile("course_code"))
     for course in courses:

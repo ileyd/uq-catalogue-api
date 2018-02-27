@@ -2,7 +2,7 @@
 Program scraper
 """
 import re
-import helpers as helpers
+from .helpers import get_soup
 from typing import List
 
 
@@ -41,7 +41,7 @@ class Program:
     """Update self based on information scraped from UQ
     """
     base_url = 'https://www.uq.edu.au/study/program.html?acad_prog={}'.format(str(self.code))
-    soup = helpers.get_soup(base_url)
+    soup = get_soup(base_url)
 
     self.title = soup.find(id="program-title").get_text()
     self.level = soup.find(id="program-title").get_text().split(' ')[0].lower()
@@ -56,7 +56,7 @@ class Program:
       self.plans.append(plan_code)
     
     alt_base_url = 'https://www.uq.edu.au/study/program_list.html?acad_prog={}'.format(self.code)
-    alt_soup = helpers.get_soup(alt_base_url)
+    alt_soup = get_soup(alt_base_url)
 
     courses = alt_soup.find_all("a", href=re.compile("course_code"))
     for course in courses:

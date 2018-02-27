@@ -1,7 +1,7 @@
 """
 Course scraper
 """
-import helpers as helpers
+from .helpers import get_soup
 from typing import List
 
 class CourseSemestersOffered:
@@ -93,7 +93,7 @@ class Course:
     """Updates self based on information scraped from UQ
     """
     base_url = 'http://www.uq.edu.au/study/course.html?course_code={}'.format(self.code)
-    soup = helpers.get_soup(base_url)
+    soup = get_soup(base_url)
 
     if soup is None or soup.find(id="course-notfound"):
       return None
